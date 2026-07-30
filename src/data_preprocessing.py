@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from pathlib import Path
+import pickle
 
 def preprocess_data(path):
     # Load data
@@ -35,7 +36,16 @@ def preprocess_data(path):
 
     X_train = preprocessor.fit_transform(X_train)
     X_test = preprocessor.transform(X_test)
+    feature_names = preprocessor.get_feature_names_out()
 
+    X_train = pd.DataFrame(
+        X_train,
+        columns=feature_names
+    )
+    X_test = pd.DataFrame(
+        X_test,
+        columns = feature_names
+    )
     return X_train, X_test, y_train, y_test, preprocessor
 
 def save_data(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame, Y_test: pd.DataFrame, data_path: str) -> None:
@@ -52,11 +62,11 @@ def save_data(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame
         raise
 
 
-print(os.getcwd())
-print(os.path.exists("data/creditcard.csv"))
+os.makedirs("models", exist_ok=True)
 path = "data/creditcard.csv"
 def main():
     X_train, X_test, y_train, y_test, preprocessor = preprocess_data(path)
     save_data(X_train, X_test, y_train, y_test, 'data')
+    pickle.dump(preprocessor, open("models/preprocessor.pkl", "wb"))
 if __name__ == "__main__":
     main()

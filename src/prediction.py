@@ -9,8 +9,19 @@ def load_model() -> RandomForestClassifier:
         print("model function ran succesfully")
         return model
 
-def prediction(model: RandomForestClassifier):
-    prediction_data = pd.read_csv("data/prediction_data/prediction.csv")
+def load_preprocessor():
+    with open ("models/preprocessor.pkl", 'rb') as f:
+        preprocessor = pickle.load(f)
+        print("preprocessor function ran succesfully")
+        return preprocessor
+    
+def prediction(model: RandomForestClassifier, prediction_data:pd.DataFrame, preprocessor):
+    #prediction_data = pd.read_csv("data/prediction_data/prediction.csv")
+    prediction_data = preprocessor.transform(prediction_data)
+    prediction_data = pd.DataFrame(
+        prediction_data,
+        columns = model.feature_names_in_
+    )
     proba = model.predict_proba(prediction_data)[:, 1]
     pred = (proba>=0.4).astype(int)
     print("prediction function ran succesfully")
@@ -30,7 +41,9 @@ def save_prediction(pred, proba) -> None:
 
 def main():
     model = load_model()
-    pred, proba = prediction(model)
+    preprocessor = load_preprocessor()
+    prediction_data = pd.read_csv("data/prediction_data/prediction.csv")
+    pred, proba = prediction(model, prediction_data, preprocessor)
     save_prediction(pred, proba)
     print("The prediction for this transcation is: ", pred)
 

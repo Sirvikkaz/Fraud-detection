@@ -9,8 +9,8 @@ stages:
       size: 150828752
     - path: src/data_preprocessing.py
       hash: md5
-      md5: d73b3266ae53448b658d25fafd1dbe10
-      size: 2016
+      md5: a62f7c507ce3039ce2f2b86378305476
+      size: 2073
     outs:
     - path: data/model_data
       hash: md5
