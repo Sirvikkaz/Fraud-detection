@@ -1,0 +1,73 @@
+schema: '2.0'
+stages:
+  data_preprocessing:
+    cmd: python src/data_preprocessing.py
+    deps:
+    - path: data/creditcard.csv
+      hash: md5
+      md5: e90efcb83d69faf99fcab8b0255024de
+      size: 150828752
+    - path: src/data_preprocessing.py
+      hash: md5
+      md5: d73b3266ae53448b658d25fafd1dbe10
+      size: 2016
+    outs:
+    - path: data/model_data
+      hash: md5
+      md5: 27eea532b34b1b8241a9c617c260143f.dir
+      size: 158137154
+      nfiles: 4
+  model_training:
+    cmd: python src/model_training.py
+    deps:
+    - path: data/model_data
+      hash: md5
+      md5: 27eea532b34b1b8241a9c617c260143f.dir
+      size: 158137154
+      nfiles: 4
+    - path: src/model_training.py
+      hash: md5
+      md5: 552a56de3ba8fa81af61c23432a0a92a
+      size: 2251
+    outs:
+    - path: models/best_model.pickle
+      hash: md5
+      md5: be86f48d0d8f9339fc5753425df69527
+      size: 5089358
+  evaluation:
+    cmd: python src/evaluation.py
+    deps:
+    - path: data/model_data
+      hash: md5
+      md5: 27eea532b34b1b8241a9c617c260143f.dir
+      size: 158137154
+      nfiles: 4
+    - path: models/best_model.pickle
+      hash: md5
+      md5: be86f48d0d8f9339fc5753425df69527
+      size: 5089358
+    - path: src/evaluation.py
+      hash: md5
+      md5: d46232f70ed4987f01c9f8a61eaeb1b7
+      size: 1636
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 4a436e6e47b32a62fd9fbda373c42a7e
+      size: 209
+  prediction:
+    cmd: python src/prediction.py
+    deps:
+    - path: data/prediction_data/prediction.csv
+      hash: md5
+      md5: 9cfcd8bdcfce99a4244f638036a7d6fa
+      size: 628
+    - path: models/best_model.pickle
+      hash: md5
+      md5: be86f48d0d8f9339fc5753425df69527
+      size: 5089358
+    outs:
+    - path: reports/predictions_outcome.csv
+      hash: md5
+      md5: 811aec0f6aa0715175419569835248e0
+      size: 31

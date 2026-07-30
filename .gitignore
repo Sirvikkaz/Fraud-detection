@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# MLflow
+mlartifacts/
+mlruns/
+mlflow.db
+
+# DVC outputs
+models/
+data/model_data/
+reports/predictions_outcome.csv
+
+# Raw dataset (tracked by DVC, not Git)
+data/creditcard.csv

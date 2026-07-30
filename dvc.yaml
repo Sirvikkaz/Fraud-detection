@@ -1,0 +1,33 @@
+stages:
+  data_preprocessing:
+   cmd: python src/data_preprocessing.py
+   deps:
+    - src/data_preprocessing.py
+    - data/creditcard.csv
+   outs:
+    - data/model_data
+
+  model_training:
+    cmd: python src/model_training.py
+    deps: 
+     - src/model_training.py
+     - data/model_data
+    outs:
+     - models/best_model.pickle
+
+  evaluation:
+    cmd: python src/evaluation.py
+    deps:
+      - src/evaluation.py
+      - models/best_model.pickle
+      - data/model_data
+    metrics:
+      - reports/metrics.json
+
+  prediction:
+    cmd: python src/prediction.py
+    deps:
+      - models/best_model.pickle
+      - data/prediction_data/prediction.csv
+    outs:
+      - reports/predictions_outcome.csv
