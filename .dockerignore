@@ -1,0 +1,41 @@
+# Data files
+data/creditcard.csv
+data/model_data/
+
+# Notebooks
+notebooks/
+
+#reports
+/reports
+
+# MLflow runs
+mlruns/
+
+#mlartifcats
+mlartifacts/
+
+#jupyter runs cache 
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# VS Code
+.vscode/
+
+# DVC
+.dvc/
+dvc.lock
+dvc.yaml
