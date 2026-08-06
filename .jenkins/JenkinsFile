@@ -26,32 +26,6 @@ pipeline {
       }
     }
 
-    stage('Download Models') {
-    steps {
-
-        script {
-
-            sh '''
-
-            mkdir -p models
-
-
-
-            aws s3 cp s3://fraud-model-452110701928/models models --recursive 
-
-
-
-            echo "Downloaded models:"
-
-            ls -R models
-
-            '''
-
-        }
-
-    }
-
-}
 
     stage('Build Image') {
       steps {

@@ -12,7 +12,8 @@ COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 
 COPY . .
-COPY models/ /app/models/
+
+RUN mkdir -p models && aws s3 cp s3://fraud-model-452110701928/models models --recursive
 
 #port
 EXPOSE 8000
