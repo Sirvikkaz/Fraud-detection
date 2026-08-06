@@ -63,7 +63,8 @@ pipeline {
             ls -R
             '''
           sh """
-          docker build -t ${ECR_REPOSITORY}:latest .
+          docker build --no-cache -t ${ECR_REPOSITORY}:latest .
+          docker run --rm ${ECR_REPOSITORY}:latest ls -R /app/models
           """
         }
       }
