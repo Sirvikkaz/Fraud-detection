@@ -3,4 +3,4 @@ services:
   application:
     image: "${IMAGE_NAME}"
     ports:
-      - "8080:8080"
+      - "8080:8000"
