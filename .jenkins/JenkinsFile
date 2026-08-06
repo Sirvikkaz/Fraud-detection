@@ -52,6 +52,7 @@ pipeline {
     }
 
 }
+
     stage('Build Image') {
       steps {
         script {
@@ -70,6 +71,17 @@ pipeline {
       }
     }
 
+    stage('Verify Image') {
+    steps {
+        script {
+            sh """
+            echo "Checking models inside built image..."
+            docker run --rm ${ECR_REPOSITORY}:latest ls -R /app/models
+            """
+        }
+    }
+}
+
     stage('Push Image') {
       steps {
         script {
@@ -77,6 +89,23 @@ pipeline {
         }
       }
     }
+
+    stage('Verify Pushed Image') {
+    steps {
+        script {
+            sh """
+            echo "Removing local image..."
+            docker rmi -f ${ECR_REPOSITORY}:latest || true
+
+            echo "Pulling image back from ECR..."
+            docker pull ${ECR_REPOSITORY}:latest
+
+            echo "Checking models inside pulled image..."
+            docker run --rm ${ECR_REPOSITORY}:latest ls -R /app/models
+            """
+        }
+    }
+}
 
     stage('Continuous Deployment') {
       steps {
