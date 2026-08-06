@@ -29,9 +29,17 @@ pipeline {
     stage('Build Image') {
       steps {
         script {
-          sh 'docker build -t ${ECR_REPOSITORY}:latest .'
-        }
+          sh '''
+            echo "Current directory:"
+            pwd
 
+            echo "Repository contents:"
+            ls -R
+            '''
+          sh """
+          docker build -t ${ECR_REPOSITORY}:latest .
+          """
+        }
       }
     }
 
@@ -40,7 +48,6 @@ pipeline {
         script {
           sh 'docker push ${ECR_REPOSITORY}:latest'
         }
-
       }
     }
 
