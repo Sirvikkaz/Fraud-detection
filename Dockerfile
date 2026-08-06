@@ -11,8 +11,8 @@ WORKDIR /app
 COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 
-COPY models/ /app/models/
 COPY . .
+COPY models/ /app/models/
 
 #port
 EXPOSE 8000
