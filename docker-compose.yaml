@@ -1,6 +1,6 @@
 version: '3'
 services:
   application:
-    image: "${IMAGE_NAME}"
+    image: "452110701928.dkr.ecr.us-east-1.amazonaws.com/fraud-det:latest"
     ports:
       - "8080:8000"
