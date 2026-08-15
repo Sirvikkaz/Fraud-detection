@@ -13,8 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-COPY models/ ./models/
-
 #port
 EXPOSE 8000
 
