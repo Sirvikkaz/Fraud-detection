@@ -1,32 +1,45 @@
-name: Trigger Jenkins Job
+name: CI
 
 on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
   workflow_dispatch:
-    
+
+permissions:
+  contents: read
+
 jobs:
-  trigger:
-    name: Build
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Trigger Jenkins Job
-        uses: appleboy/jenkins-action@master
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          url: ${{ secrets.URL }}
-          user: ${{ secrets.USER }}
-          token: ${{ secrets.TOKEN }}
-          job: ${{ secrets.JOBS }}
+          python-version: "3.11"
+          cache: "pip"
 
-# name: Trigger Jenkins Job
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-# on:
-#   workflow_dispatch:
-    
-# jobs:
-#   trigger:
-#     name: Build
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Trigger Jenkins Job
-#         run: |
-#           curl -v -X POST "${{ secrets.URL }}/job/${{ secrets.JOBS }}/build" \
-#             --user "${{ secrets.USER }}:${{ secrets.TOKEN }}"
+      - name: Check Python
+        run: python --version
+
+      - name: Check imports
+        run: |
+          python -c "import pandas"
+          python -c "import sklearn"
+          python -c "import fastapi"
+          python -c "import pydantic"
+
+      - name: Build Docker image
+        run: docker build -t fraud-detection-api .
