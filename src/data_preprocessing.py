@@ -5,18 +5,62 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from pathlib import Path
 import pickle
+import logging 
+
+logger = logging.getLogger("data_preprocessing")
+logger.setLevel("DEBUG")
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel("DEBUG")
+
+file_handler = logging.FileHandler("data_preprocessing_error.log")
+file_handler.setLevel("ERROR")
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
 
 def preprocess_data(path):
     # Load data
-    df = pd.read_csv(path)
+    """Loading csv data from path"""
+    try:
+        df = pd.read_csv(path)
+        logger.debug("Data loaded successfully from %s", path)
+        
+    except FileNotFoundError:
+        logger.error('File not found: %s', path)
+        raise
+    except Exception as e:
+        logger.error("Unexcepted error from: %s", e)
+        raise
 
     # Remove duplicates
     df.drop_duplicates(inplace=True)
 
     # Features & target
-    X = df.drop("Class", axis=1)
+    try:
+        X = df.drop("Class", axis=1)
+        logger.debug("Successfully dropped target variable from input data %s", path)
+    except KeyError:
+        logger.error("Target column not present in the data %s", path)
+        raise
+    except Exception as e:
+        logger.error("Unexpected error from %s", e)
+        raise
     y = df["Class"]
 
+    required_features = ["Time", "Amount"]
+    missing_features = [col for col in required_features if col not in df.columns]
+
+    if missing_features:
+        logger.error("Missing required columns: %s", missing_features)
+        raise ValueError(f"Missing required columns: {missing_features}")
+    
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -56,9 +100,8 @@ def save_data(X_train: pd.DataFrame, X_test: pd.DataFrame, Y_train: pd.DataFrame
         pd.DataFrame(Y_train).to_csv(os.path.join(data_path, "y_train.csv"), index=False)
         pd.DataFrame(Y_test).to_csv(os.path.join(data_path, "y_test.csv"), index=False)
         pd.DataFrame(X_test).to_csv(os.path.join(data_path, "test.csv"), index=False)
-    except Exception as e:
-        print(f"Error: An unexpected error occurred while saving the data.")
-        print(e)
+    except Exception:
+        logger.exception("Error: An unexpected error occurred while saving the data.")
         raise
 
 

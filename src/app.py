@@ -1,18 +1,52 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 import pickle
 import pandas as pd
 from src.prediction import prediction
+import logging 
+
+logger = logging.getLogger("app")
+logger.setLevel("DEBUG")
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel("DEBUG")
+
+file_handler = logging.FileHandler("app.log")
+file_handler.setLevel("DEBUG")
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
 app = FastAPI (
     title="API for fraud detection",
     description = "An API, that takes transactions as data input and flags transactions as fraudulent or not",
     version="0.1.0"
 )
+try:
+    with open("models/best_model.pickle", "rb") as f:
+        model = pickle.load(f)
+        logger.debug("Model loaded successfully")
+except FileNotFoundError:
+    logger.error("Model not found")
+    raise
+except Exception:
+    logger.exception("Unexpected error")
+    raise
 
-with open("models/best_model.pickle", "rb") as f:
-    model = pickle.load(f)
-with open("models/preprocessor.pkl", "rb") as f:
-    preprocessor = pickle.load(f)
+try:
+    with open("models/preprocessor.pkl", "rb") as f:
+        preprocessor = pickle.load(f)
+        logger.debug("Preprocessor loaded successfully")
+except FileNotFoundError:
+    logger.error("Preprocessor not found")
+    raise
+except Exception:
+    logger.exception("Unexpected error")
+    raise
 
 class Transaction(BaseModel):
     Time:float
@@ -44,7 +78,7 @@ class Transaction(BaseModel):
     V26: float
     V27: float
     V28: float
-    Amount: float
+    Amount: float = Field(ge=0)
 
 
 transaction = {
@@ -89,10 +123,10 @@ def root():
             transactions = pd.DataFrame([transaction])
             prediction(model, transactions, preprocessor)
             warmed_up = True
-        except Exception as e:
+        except Exception:
+            logger.exception("Model warm-up failed")
             return {
                 "status": "Model not ready",
-                "error": str(e)
             }
     return {
         "message":"Model ready!"
@@ -114,8 +148,7 @@ async def predict_transaction(transaction:Transaction):
         }
     
     except Exception as e:
-        return {
-            "error":str(e)
-        }
+        logger.exception("Unexpected error during prediction")
+        raise HTTPException(status_code=500, detail="Prediction failed")
 
     

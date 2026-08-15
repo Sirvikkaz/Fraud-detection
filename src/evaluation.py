@@ -10,6 +10,24 @@ import json
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+import logging
+
+logger = logging.getLogger("evaluation")
+logger.setLevel("DEBUG")
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel("DEBUG")
+
+file_handler = logging.FileHandler("evaluation.log")
+file_handler.setLevel("ERROR")
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
 
 def evaluate_model(model, test:pd.DataFrame, y_test:pd.Series) -> dict:
     y_proba = model.predict_proba(test)[:,1]
@@ -31,8 +49,15 @@ def evaluate_model(model, test:pd.DataFrame, y_test:pd.Series) -> dict:
 def main():
     with open ("models/best_model.pickle", 'rb') as f:
         model = pickle.load(f)
-
-    y_test = pd.read_csv("data/model_data/y_test.csv").squeeze()
+    try:
+        y_test = pd.read_csv("data/model_data/y_test.csv").squeeze()
+        logger.debug("Successfully loaded data")
+    except FileNotFoundError:
+        logger.error("file not found")
+        raise
+    except Exception as e:
+        logger.error("An unexcepted error occur: %s", e)
+        raise
     test = pd.read_csv("data/model_data/test.csv")
     metrics = evaluate_model(model, test, y_test)
     os.makedirs("reports", exist_ok=True)
@@ -41,14 +66,13 @@ def main():
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
     mlflow.set_experiment("Fraud-detection")
     with mlflow.start_run():
-        with open("reports/metrics.json", "r") as f:
-            metrics = json.load(f)
         for metric, value in metrics.items():
             mlflow.log_metric(metric, value)
 
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:
-        print(f"Error during evaluation: {e}")
+    except Exception:
+        logger.exception("Error during evaluation")
+        raise
 

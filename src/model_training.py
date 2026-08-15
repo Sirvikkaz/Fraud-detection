@@ -1,12 +1,27 @@
 import os
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 import pickle
 import mlflow
 import mlflow.sklearn
-import json
+import logging
+
+logger = logging.getLogger("model_training")
+logger.setLevel("DEBUG")
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel("DEBUG")
+
+file_handler = logging.FileHandler("model_training.log")
+file_handler.setLevel("ERROR")
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 param_grid = {
     'n_estimators': [100, 200],
@@ -17,14 +32,6 @@ param_grid = {
 }
 rf = RandomForestClassifier(random_state=42)
 
-# grid = GridSearchCV(
-#     estimator=rf,
-#     scoring='f1',
-#     param_grid=param_grid,
-#     n_jobs =-1,
-#     cv=5,
-#     verbose=2
-# )
 
 random_search = RandomizedSearchCV(
     estimator=rf,
@@ -36,7 +43,7 @@ random_search = RandomizedSearchCV(
     verbose = 2,
     random_state=42
 )
-model = RandomForestClassifier(random_state=42, class_weight="balanced")
+
 os.makedirs("models", exist_ok=True)
 os.makedirs("reports", exist_ok=True)
 def model_train(X_train:pd.DataFrame, y_train:pd.Series)->RandomForestClassifier:
@@ -52,7 +59,6 @@ def model_train(X_train:pd.DataFrame, y_train:pd.Series)->RandomForestClassifier
         
         for param, value in best_params.items():
             mlflow.log_param(param, value)
-        print(random_search.best_score_)
         #Log best cv score
         mlflow.log_metric("best_cv_f1_score", random_search.best_score_)
         
@@ -62,15 +68,32 @@ def model_train(X_train:pd.DataFrame, y_train:pd.Series)->RandomForestClassifier
         with open("models/best_model.pickle", "wb") as f:
             pickle.dump(model, f)
         
-        print(f"Best params{random_search.best_params_}")
-        print(f"Best CV F1: {random_search.best_score_}")
+        logger.debug("Best params: %s", random_search.best_params_)
+        logger.debug("Best CV F1: %s", random_search.best_score_)
         return model 
 
 
 
 def main():
-    X_train = pd.read_csv("data/model_data/train.csv")
-    y_train = pd.read_csv("data/model_data/y_train.csv").squeeze() #added to convert y_train to Series
+    try:
+        X_train = pd.read_csv("data/model_data/train.csv")
+        logger.debug("data successfully loaded")
+    except FileNotFoundError:
+        logger.error("file not found")
+        raise
+    except Exception:
+        logger.exception("An unexpected error occurred while loading this data")
+        raise
+    try:
+        y_train = pd.read_csv("data/model_data/y_train.csv").squeeze() #added to convert y_train to Series
+        logger.debug("data successfully loaded")
+    except FileNotFoundError:
+        logger.error("file not found")
+        raise
+    except Exception:
+        logger.exception("An unexpected error occurred while loading this data")
+        raise
+    
     model_train(X_train, y_train)
 
 if __name__ == "__main__":
