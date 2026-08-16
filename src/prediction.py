@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 import logging
 
+
 logger = logging.getLogger("prediction")
 logger.setLevel("DEBUG")
 
