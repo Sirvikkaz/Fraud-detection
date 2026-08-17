@@ -223,7 +223,8 @@ mlruns/
 mlflow.db
 
 # DVC outputs
-models/
+models/*.pkl
+!models/*.dvc
 data/model_data/
 reports/predictions_outcome.csv
 
