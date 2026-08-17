@@ -10,6 +10,7 @@ WORKDIR /app
 #install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir "dvc[s3]"
 
 COPY . .
 #pull dvc tracked file from s3
