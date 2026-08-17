@@ -225,8 +225,8 @@ POST /predict
 
 ```json
 {
-    "prediction": 1,
-    "label": "Fraud"
+    "prediction": 0,
+    "label": "Normal"
 }
 ```
 
