@@ -224,6 +224,7 @@ mlflow.db
 
 # DVC outputs
 models/*.pkl
+models/*.pickle
 !models/*.dvc
 data/model_data/
 reports/predictions_outcome.csv
