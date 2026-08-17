@@ -12,6 +12,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+#pull dvc tracked file from s3
+RUN dvc pull models/best_model.pickle models/preprocessor.pkl
 
 #port
 EXPOSE 8000

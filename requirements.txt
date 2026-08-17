@@ -5,6 +5,7 @@ numpy==2.4.6
 scikit-learn==1.9.0
 pydantic==2.13.4
 pydantic_core==2.46.4
+evidently==0.7.21
 typing_extensions==4.16.0
 typing-inspection==0.4.2
 starlette==1.3.1
